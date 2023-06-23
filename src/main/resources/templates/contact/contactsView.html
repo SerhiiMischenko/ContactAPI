@@ -1,0 +1,30 @@
+<!-- contact/contactsView.html -->
+
+<!DOCTYPE html>
+<html xmlns:c="" lang="">
+<head>
+    <title>Contact List</title>
+</head>
+<body>
+<h1>Contact List</h1>
+<table>
+    <thead>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Iterating over allContacts and displaying contact information -->
+    <c:forEach items="${allContacts}" var="contact">
+        <tr>
+            <td>${contact.firstName}</td>
+            <td>${contact.lastName}</td>
+            <td>${contact.phoneNumber}</td>
+        </tr>
+    </c:forEach>
+    </tbody>
+</table>
+</body>
+</html>
