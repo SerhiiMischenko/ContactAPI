@@ -18,6 +18,8 @@ public class ContactController {
 @RequestMapping(value = "/get", method = {RequestMethod.GET})
     public ModelAndView getContact() {
     ModelAndView result = new ModelAndView("contact/contactsView");
-    return result.addObject("allContacts", contactService.readAllContacts());
+    result.addObject("allContacts", contactService.readAllContacts());
+    System.out.println(result);
+    return result;
     }
 }

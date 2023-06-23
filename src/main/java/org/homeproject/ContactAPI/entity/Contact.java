@@ -1,8 +1,11 @@
 package org.homeproject.ContactAPI.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 @Entity
 @Table(name = "contacts")
+@Data
 public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +28,9 @@ public class Contact {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
+    }
+
+    public Contact() {
     }
 }
 

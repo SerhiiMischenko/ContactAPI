@@ -1,7 +1,5 @@
-<!-- contact/contactsView.html -->
-
 <!DOCTYPE html>
-<html xmlns:c="" lang="">
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>Contact List</title>
 </head>
@@ -16,14 +14,11 @@
     </tr>
     </thead>
     <tbody>
-    <!-- Iterating over allContacts and displaying contact information -->
-    <c:forEach items="${allContacts}" var="contact">
-        <tr>
-            <td>${contact.firstName}</td>
-            <td>${contact.lastName}</td>
-            <td>${contact.phoneNumber}</td>
-        </tr>
-    </c:forEach>
+    <tr th:each="contact : ${allContacts}">
+        <td th:text="${contact.firstName}"></td>
+        <td th:text="${contact.lastName}"></td>
+        <td th:text="${contact.phoneNumber}"></td>
+    </tr>
     </tbody>
 </table>
 </body>

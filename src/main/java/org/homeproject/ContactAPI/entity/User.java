@@ -14,7 +14,7 @@ public class User {
     private Long id;
     private String username;
     private String password;
-    private UserRole role;
+    private String role;
 
     public User() {
     }
@@ -22,6 +22,6 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.role = UserRole.USER_ROLE;
+        this.role = UserRole.USER.toString();
     }
 }
