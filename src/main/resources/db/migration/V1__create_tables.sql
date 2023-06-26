@@ -14,9 +14,5 @@ CREATE TABLE contacts (
   user_id INT NOT NULL,
   first_name VARCHAR(50) NOT NULL,
   last_name VARCHAR(50) NOT NULL,
-  phone_number VARCHAR(20) NOT NULL,
-  CONSTRAINT fk_user
-    FOREIGN KEY (user_id)
-    REFERENCES users(id)
-    ON DELETE CASCADE
+  phone_number VARCHAR(20) NOT NULL
 );

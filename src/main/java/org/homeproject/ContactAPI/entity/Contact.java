@@ -11,9 +11,11 @@ public class Contact {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long user_id;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -28,6 +30,7 @@ public class Contact {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
+        this.user_id = 4L;
     }
 
     public Contact() {
