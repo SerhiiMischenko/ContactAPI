@@ -19,8 +19,11 @@ public class UserController {
     }
     @PostMapping("/create")
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        User newUser = userService.createUser(user);
-        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+        User emptyUser = new User();
+        emptyUser.setUsername(user.getUsername());
+        emptyUser.setPassword(user.getPassword());
+        User compliteUser = userService.createUser(emptyUser);
+        return new ResponseEntity<>(compliteUser, HttpStatus.CREATED);
     }
     @GetMapping("/get")
     public ResponseEntity<List<User>> getUsers() {
@@ -32,12 +35,14 @@ public class UserController {
         User getUser = userService.getUserById(id);
         return new ResponseEntity<>(getUser, HttpStatus.OK);
     }
-    @PostMapping("/update{id}")
+    @PostMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         User oldUser = userService.getUserById(id);
         if(oldUser != null) {
-            oldUser.setUsername(user.getUsername());
-            oldUser.setPassword(user.getPassword());
+            if(user.getUsername() != null && user.getPassword() != null) {
+                oldUser.setUsername(user.getUsername());
+                oldUser.setPassword(user.getPassword());
+            }
             oldUser.setRole(user.getRole());
             User updateUser = userService.updateUser(oldUser);
             return new ResponseEntity<>(updateUser, HttpStatus.OK);
@@ -45,7 +50,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-    @DeleteMapping("/delete{id}")
+    @DeleteMapping("/delete/{id}")
     public void deleteById(@PathVariable Long id) {
         userService.deleteUserById(id);
     }

@@ -17,11 +17,16 @@ public class User {
     private String role;
 
     public User() {
+        this.role = UserRole.USER.toString();
     }
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
         this.role = UserRole.USER.toString();
+    }
+
+    public User(String role) {
+        this.role = role;
     }
 }
