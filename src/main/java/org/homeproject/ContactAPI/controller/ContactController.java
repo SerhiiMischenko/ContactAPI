@@ -25,7 +25,7 @@ public class ContactController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<List<Contact>> getContact() {
+    public ResponseEntity<List<Contact>> getContacts() {
         List<Contact> allContacts = contactService.readAllContacts();
         return new ResponseEntity<>(allContacts, HttpStatus.OK);
     }

@@ -16,20 +16,20 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User createContact(User user) {
+    public User createUser(User user) {
         return userRepository.save(user);
     }
-    public List<User> readAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
     public User updateUser(User user) {
         return userRepository.save(user);
     }
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
-    }
-    public User readUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
