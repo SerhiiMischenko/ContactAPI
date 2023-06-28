@@ -1,6 +1,6 @@
 package org.homeproject.ContactAPI.entity;
 
 public enum UserRole {
-    ADMIN,
-    USER
+    ROLE_ADMIN,
+    ROLE_USER
 }
