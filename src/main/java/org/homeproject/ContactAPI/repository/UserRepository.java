@@ -1,4 +1,4 @@
-package org.homeproject.ContactAPI.data;
+package org.homeproject.ContactAPI.repository;
 
 import org.homeproject.ContactAPI.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

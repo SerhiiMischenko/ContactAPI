@@ -1,7 +1,7 @@
 package org.homeproject.ContactAPI.service;
 
 import lombok.Data;
-import org.homeproject.ContactAPI.data.ContactRepository;
+import org.homeproject.ContactAPI.repository.ContactRepository;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.springframework.stereotype.Service;
 import java.util.List;
