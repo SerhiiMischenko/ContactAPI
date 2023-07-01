@@ -23,12 +23,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/contact/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers("/contact/delete/{id}").hasRole("ADMIN")
+                .antMatchers("/contact/update/{id}").hasRole("ADMIN")
+                .antMatchers("/contact/**").hasAnyRole("USER")
                 .and()
                 .httpBasic()
                 .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
                 .csrf().disable();
     }

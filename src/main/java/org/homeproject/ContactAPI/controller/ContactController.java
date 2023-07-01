@@ -39,13 +39,19 @@ public class ContactController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    @PostMapping("update/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<Contact> updateContact(@PathVariable ("id") Long id, @RequestBody Contact contact) {
         Contact oldContact = contactService.readContactById(id);
         if(oldContact != null) {
-            oldContact.setFirstName(contact.getFirstName());
-            oldContact.setLastName(contact.getLastName());
-            oldContact.setPhoneNumber(contact.getPhoneNumber());
+            if(contact.getFirstName() != null){
+                oldContact.setFirstName(contact.getFirstName());
+            }
+            if (contact.getLastName() != null) {
+                oldContact.setLastName(contact.getLastName());
+            }
+            if(contact.getPhoneNumber() != null){
+                oldContact.setPhoneNumber(contact.getPhoneNumber());
+            }
 
             Contact updContact = contactService.updateContact(oldContact);
             return new ResponseEntity<>(updContact, HttpStatus.OK);
