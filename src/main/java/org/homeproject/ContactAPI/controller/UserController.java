@@ -5,6 +5,7 @@ import org.homeproject.ContactAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
@@ -21,7 +24,7 @@ public class UserController {
     public ResponseEntity<User> createUser(@RequestBody User user) {
         User emptyUser = new User();
         emptyUser.setUsername(user.getUsername());
-        emptyUser.setPassword(user.getPassword());
+        emptyUser.setPassword(passwordEncoder.encode(user.getPassword()));
         User compliteUser = userService.createUser(emptyUser);
         return new ResponseEntity<>(compliteUser, HttpStatus.CREATED);
     }
@@ -41,7 +44,7 @@ public class UserController {
         if(oldUser != null) {
             if(user.getUsername() != null && user.getPassword() != null) {
                 oldUser.setUsername(user.getUsername());
-                oldUser.setPassword(user.getPassword());
+                oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             oldUser.setRole(user.getRole());
             User updateUser = userService.updateUser(oldUser);
