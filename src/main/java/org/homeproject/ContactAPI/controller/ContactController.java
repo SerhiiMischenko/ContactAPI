@@ -1,11 +1,13 @@
 package org.homeproject.ContactAPI.controller;
 import org.homeproject.ContactAPI.entity.Contact;
+import org.homeproject.ContactAPI.error.ErrorResponse;
 import org.homeproject.ContactAPI.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,14 +37,26 @@ public class ContactController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<Contact> getContactByID(@PathVariable("id") Long id) {
-        Contact findContact = contactService.readContactById(id);
-        if(findContact != null) {
-            return new ResponseEntity<>(findContact, HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> getContactByID(@PathVariable("id") Long id) {
+        try {
+            Contact findContact = contactService.readContactById(id);
+            if (findContact != null) {
+                return new ResponseEntity<>(findContact, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (RuntimeException e) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
+            errorResponse.setMessage("Contact not found");
+            errorResponse.setTimestamp(LocalDateTime.now());
+            errorResponse.setPath("/contact/get/" + id);
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
     }
+
+
     @PutMapping("update/{id}")
     public ResponseEntity<Contact> updateContact(@PathVariable ("id") Long id, @RequestBody Contact contact) {
         Contact oldContact = contactService.readContactById(id);
