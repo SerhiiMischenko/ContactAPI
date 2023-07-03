@@ -6,6 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -27,6 +30,7 @@ public class ContactController {
     @GetMapping("/get")
     public ResponseEntity<List<Contact>> getContacts() {
         List<Contact> allContacts = contactService.readAllContacts();
+        Collections.sort(allContacts, Comparator.comparing(Contact::getLastName));
         return new ResponseEntity<>(allContacts, HttpStatus.OK);
     }
 
