@@ -29,7 +29,9 @@ public class Contact {
     public Contact(String firstName, String lastName, String phoneNumber) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
+        if(phoneNumber.matches("\\+\\d{12}")) {
+            this.phoneNumber = phoneNumber;
+        }
         this.user_id = 4L;
     }
 
