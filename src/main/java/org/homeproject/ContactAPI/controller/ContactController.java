@@ -5,10 +5,13 @@ import org.homeproject.ContactAPI.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import org.homeproject.ContactAPI.entity.User;
 
 @RestController
 @RequestMapping("/contact")
@@ -23,8 +26,9 @@ public class ContactController {
     @PostMapping("/create")
     public ResponseEntity<?> createContact(@RequestBody Contact contact) {
         try {
-            return new ResponseEntity<>(contactService.createContact(
-                    new Contact(contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber())), HttpStatus.OK);
+                return new ResponseEntity<>(contactService.createContact(
+                        new Contact(contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber())),
+                        HttpStatus.OK);
         }catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.statusNotValid("Some row is empty", "/create");

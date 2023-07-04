@@ -11,11 +11,9 @@ public class Contact {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-    @Column(name = "user_id", nullable = false)
-    private Long user_id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -32,7 +30,6 @@ public class Contact {
         if(phoneNumber.matches("\\+\\d{12}")) {
             this.phoneNumber = phoneNumber;
         }
-        this.user_id = 4L;
     }
 
     public Contact() {
