@@ -1,8 +1,10 @@
 package org.homeproject.ContactAPI.controller;
+import org.homeproject.ContactAPI.dto.ContactDTO;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.homeproject.ContactAPI.error.ErrorResponse;
 import org.homeproject.ContactAPI.service.ContactService;
 import org.homeproject.ContactAPI.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.homeproject.ContactAPI.entity.User;
 
 @RestController
@@ -43,9 +47,13 @@ public class ContactController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<List<Contact>> getContacts() {
+    public ResponseEntity<List<ContactDTO>> getContacts() {
         List<Contact> allContacts = contactService.readAllContacts();
-        return new ResponseEntity<>(allContacts, HttpStatus.OK);
+        ModelMapper modelMapper = new ModelMapper();
+        List<ContactDTO> contactDTOList = allContacts.stream()
+                .map(contact -> modelMapper.map(contact, ContactDTO.class))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(contactDTOList, HttpStatus.OK);
     }
 
     @GetMapping("/get/{id}")
@@ -53,7 +61,9 @@ public class ContactController {
         try {
             Contact findContact = contactService.readContactById(id);
             if (findContact != null) {
-                return new ResponseEntity<>(findContact, HttpStatus.OK);
+                ModelMapper modelMapper = new ModelMapper();
+                ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
+                return new ResponseEntity<>(contactDTO, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

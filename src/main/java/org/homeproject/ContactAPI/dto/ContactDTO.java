@@ -1,6 +1,7 @@
 package org.homeproject.ContactAPI.dto;
 
 import lombok.Data;
+import org.homeproject.ContactAPI.entity.User;
 
 @Data
 public class ContactDTO {
