@@ -1,8 +1,10 @@
 package org.homeproject.ContactAPI.controller;
 
+import org.homeproject.ContactAPI.dto.UserDTO;
 import org.homeproject.ContactAPI.entity.User;
 import org.homeproject.ContactAPI.error.ErrorResponse;
 import org.homeproject.ContactAPI.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -37,15 +40,21 @@ public class UserController {
         }
     }
     @GetMapping("/get")
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<UserDTO>> getUsers() {
         List<User> userList = userService.getAllUsers();
-        return new ResponseEntity<>(userList, HttpStatus.OK);
+        ModelMapper modelMapper = new ModelMapper();
+        List<UserDTO> userDTOList = userList.stream()
+                .map(user -> modelMapper.map(user, UserDTO.class))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(userDTOList, HttpStatus.OK);
     }
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
     try {
         User getUser = userService.getUserById(id);
-        return new ResponseEntity<>(getUser, HttpStatus.OK);
+        ModelMapper modelMapper = new ModelMapper();
+        UserDTO userDTO = modelMapper.map(getUser, UserDTO.class);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }catch (RuntimeException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.statusNotFound(id, "User not found", "/get/");
