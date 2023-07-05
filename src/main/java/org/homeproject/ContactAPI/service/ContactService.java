@@ -5,6 +5,7 @@ import org.homeproject.ContactAPI.repository.ContactRepository;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Data
@@ -29,5 +30,15 @@ public class ContactService {
     public Contact readContactById(Long id) {
         return contactRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contact not found"));
+    }
+
+    public List<Contact> getContactsByUserId(Long id) {
+        List<Contact> contactRepositoryAll = contactRepository.findAll();
+
+        List<Contact> filteredContacts = contactRepositoryAll.stream()
+                .filter(contact -> contact.getUser_id().equals(id))
+                .collect(Collectors.toList());
+
+        return filteredContacts;
     }
 }

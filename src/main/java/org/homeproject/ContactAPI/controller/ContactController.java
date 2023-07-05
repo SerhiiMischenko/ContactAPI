@@ -47,14 +47,20 @@ public class ContactController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<List<ContactDTO>> getContacts() {
-        List<Contact> allContacts = contactService.readAllContacts();
+    public ResponseEntity<List<ContactDTO>> getContacts(Authentication authentication) {
+        String currentUsername = authentication.getName();
+        User currentUser = userService.getUserByUsername(currentUsername);
+
+        List<Contact> userContacts = contactService.getContactsByUserId(currentUser.getId());
+
         ModelMapper modelMapper = new ModelMapper();
-        List<ContactDTO> contactDTOList = allContacts.stream()
+        List<ContactDTO> contactDTOList = userContacts.stream()
                 .map(contact -> modelMapper.map(contact, ContactDTO.class))
                 .collect(Collectors.toList());
+
         return new ResponseEntity<>(contactDTOList, HttpStatus.OK);
     }
+
 
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getContactByID(@PathVariable("id") Long id) {
