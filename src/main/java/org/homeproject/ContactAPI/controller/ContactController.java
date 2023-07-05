@@ -2,12 +2,15 @@ package org.homeproject.ContactAPI.controller;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.homeproject.ContactAPI.error.ErrorResponse;
 import org.homeproject.ContactAPI.service.ContactService;
+import org.homeproject.ContactAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Security;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -17,25 +20,37 @@ import org.homeproject.ContactAPI.entity.User;
 @RequestMapping("/contact")
 public class ContactController {
     private final ContactService contactService;
+    private final UserService userService;
+
+
 
     @Autowired
-    public ContactController(ContactService contactService) {
+    public ContactController(ContactService contactService, UserService userService) {
         this.contactService = contactService;
+        this.userService = userService;
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createContact(@RequestBody Contact contact) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        User currentUser = userService.getUserByUsername(currentUserName);
+        Contact newContact = new Contact(currentUser, contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber());
         try {
-                return new ResponseEntity<>(contactService.createContact(
-                        new Contact(contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber())),
-                        HttpStatus.OK);
-        }catch (RuntimeException e) {
+            return new ResponseEntity<>(contactService.createContact(newContact), HttpStatus.OK);
+        } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.statusNotValid("Some row is empty", "/create");
 
-            return new ResponseEntity<>(errorResponse ,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
+
+
+
+
+
 
     @GetMapping("/get")
     public ResponseEntity<List<Contact>> getContacts() {

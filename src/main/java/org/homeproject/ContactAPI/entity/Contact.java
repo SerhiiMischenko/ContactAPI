@@ -24,13 +24,15 @@ public class Contact {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    public Contact(String firstName, String lastName, String phoneNumber) {
+    public Contact(User user, String firstName, String lastName, String phoneNumber) {
+        this.user = user;
         this.firstName = firstName;
         this.lastName = lastName;
-        if(phoneNumber.matches("\\+\\d{12}")) {
+        if (phoneNumber.matches("\\+\\d{12}")) {
             this.phoneNumber = phoneNumber;
         }
     }
+
 
     public Contact() {
     }

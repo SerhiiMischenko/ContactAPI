@@ -1,6 +1,7 @@
 package org.homeproject.ContactAPI.entity;
 
 import lombok.Data;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import javax.persistence.*;
 
