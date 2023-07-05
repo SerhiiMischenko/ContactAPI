@@ -23,7 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/user/create").permitAll()
+                .antMatchers("/user/create").anonymous()
                 .antMatchers("/contact/delete/{id}").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/contact/update/{id}").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/contact/get").hasAnyRole("ADMIN", "USER")
@@ -39,6 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable();
     }
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
