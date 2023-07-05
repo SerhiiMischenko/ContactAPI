@@ -26,6 +26,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/create").permitAll()
                 .antMatchers("/contact/delete/{id}").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/contact/update/{id}").hasAnyRole("ADMIN", "USER")
+                .antMatchers("/contact/get").hasAnyRole("ADMIN", "USER")
+                .antMatchers("/contact/get/{id}").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/contact/**").hasRole("USER")
                 .antMatchers("/user/get").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/user/get/{id}").hasAnyRole("ADMIN", "USER")

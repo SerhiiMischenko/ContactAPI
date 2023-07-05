@@ -9,10 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Security;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import org.homeproject.ContactAPI.entity.User;
 
@@ -46,16 +42,9 @@ public class ContactController {
         }
     }
 
-
-
-
-
-
-
     @GetMapping("/get")
     public ResponseEntity<List<Contact>> getContacts() {
         List<Contact> allContacts = contactService.readAllContacts();
-        Collections.sort(allContacts, Comparator.comparing(Contact::getLastName));
         return new ResponseEntity<>(allContacts, HttpStatus.OK);
     }
 
