@@ -69,32 +69,31 @@ public class ContactController {
         Contact findContact = contactService.readContactById(id);
         if(findContact.getUser_id().equals(currentUser.getId())){
             try {
-                if (findContact != null) {
-                    ModelMapper modelMapper = new ModelMapper();
-                    ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
-                    return new ResponseEntity<>(contactDTO, HttpStatus.OK);
-                } else {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
+                ModelMapper modelMapper = new ModelMapper();
+                ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
+                return new ResponseEntity<>(contactDTO, HttpStatus.OK);
             } catch (RuntimeException e) {
                 ErrorResponse errorResponse = new ErrorResponse();
-                errorResponse.statusNotFound(id, "Contact not found", "/get/" + id);
+                errorResponse.statusNotFound(id, "Contact not found", "/get/");
 
                 return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
         }
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.statusNotFound(id, "Contact not found", "/get/" + id);
+        errorResponse.statusNotFound(id, "Contact not found", "/get/");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
 
     @PutMapping("update/{id}")
-    public ResponseEntity<?> updateContact(@PathVariable ("id") Long id, @RequestBody Contact contact) {
-        try{
-            Contact oldContact = contactService.readContactById(id);
-            if(oldContact != null) {
-                if(contact.getFirstName() != null){
+    public ResponseEntity<?> updateContact(@PathVariable ("id") Long id,
+                                           @RequestBody Contact contact, Authentication authentication) {
+        String currentName = authentication.getName();
+        User currentUser = userService.getUserByUsername(currentName);
+        Contact oldContact = contactService.readContactById(id);
+        if(currentUser.getId().equals(oldContact.getUser_id())) {
+            try{
+                if (contact.getFirstName() != null) {
                     oldContact.setFirstName(contact.getFirstName());
                 }
                 if (contact.getLastName() != null) {
@@ -106,27 +105,36 @@ public class ContactController {
 
                 Contact updContact = contactService.updateContact(oldContact);
                 return new ResponseEntity<>(updContact, HttpStatus.OK);
+            }catch (RuntimeException e) {
+                ErrorResponse errorResponse = new ErrorResponse();
+                errorResponse.statusNotFound(id, "Contact not found", "update/");
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
-        }catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.statusNotFound(id, "Contact not found", "update/" + id);
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.statusNotFound(id, "Contact not found", "update/");
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<ErrorResponse> deleteById(@PathVariable ("id") Long id) {
+    public ResponseEntity<ErrorResponse> deleteById(@PathVariable ("id") Long id,
+                                                    Authentication authentication) {
         ErrorResponse errorResponse = new ErrorResponse();
+        String currentName = authentication.getName();
+        User currentUser = userService.getUserByUsername(currentName);
+        Contact findContact = contactService.readContactById(id);
+        if(currentUser.getId().equals(findContact.getUser_id())){
+            try {
+                contactService.deleteById(id);
+                errorResponse.statusOk(id, "Contact deleted", "delete/");
 
-        try {
-            contactService.deleteById(id);
-            errorResponse.statusOk(id, "Contact deleted", "delete/");
+                return new ResponseEntity<>(errorResponse, HttpStatus.OK);
+            }catch (RuntimeException e) {
+                errorResponse.statusNotFound(id, "Contact not found", "delete/");
 
-            return new ResponseEntity<>(errorResponse, HttpStatus.OK);
-        }catch (RuntimeException e) {
-            errorResponse.statusNotFound(id, "Contact not found", "delete/");
-
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+            }
         }
+        errorResponse.statusNotFound(id, "Contact not found", "delete/");
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 }
