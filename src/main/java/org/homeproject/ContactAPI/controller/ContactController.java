@@ -50,6 +50,14 @@ public class ContactController {
     public ResponseEntity<List<ContactDTO>> getContacts(Authentication authentication) {
         String currentUsername = authentication.getName();
         User currentUser = userService.getUserByUsername(currentUsername);
+        if(currentUser.getRole().equals("ROLE_ADMIN")) {
+            ModelMapper modelMapper = new ModelMapper();
+            List<Contact> allContacts = contactService.readAllContacts();
+            List<ContactDTO> allContactsDTO = allContacts.stream()
+                    .map(contact -> modelMapper.map(contact, ContactDTO.class))
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(allContactsDTO, HttpStatus.OK);
+        }
 
         List<Contact> userContacts = contactService.getContactListByUserId(currentUser.getId());
 
@@ -67,7 +75,7 @@ public class ContactController {
         String currentName = authentication.getName();
         User currentUser = userService.getUserByUsername(currentName);
         Contact findContact = contactService.readContactById(id);
-        if(findContact.getUser_id().equals(currentUser.getId())){
+        if(findContact.getUser_id().equals(currentUser.getId()) || currentUser.getRole().equals("ROLE_ADMIN")){
             try {
                 ModelMapper modelMapper = new ModelMapper();
                 ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
@@ -91,7 +99,7 @@ public class ContactController {
         String currentName = authentication.getName();
         User currentUser = userService.getUserByUsername(currentName);
         Contact oldContact = contactService.readContactById(id);
-        if(currentUser.getId().equals(oldContact.getUser_id())) {
+        if(currentUser.getId().equals(oldContact.getUser_id()) || currentUser.getRole().equals("ROLE_ADMIN")) {
             try{
                 if (contact.getFirstName() != null) {
                     oldContact.setFirstName(contact.getFirstName());
@@ -122,7 +130,7 @@ public class ContactController {
         String currentName = authentication.getName();
         User currentUser = userService.getUserByUsername(currentName);
         Contact findContact = contactService.readContactById(id);
-        if(currentUser.getId().equals(findContact.getUser_id())){
+        if(currentUser.getId().equals(findContact.getUser_id()) || currentUser.getRole().equals("ROLE_ADMIN")){
             try {
                 contactService.deleteById(id);
                 errorResponse.statusOk(id, "Contact deleted", "delete/");

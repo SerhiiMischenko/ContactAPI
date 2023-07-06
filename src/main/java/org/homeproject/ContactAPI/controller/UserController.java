@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,18 +29,16 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
-            User emptyUser = new User();
-            emptyUser.setUsername(user.getUsername());
-            emptyUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            User compliteUser = userService.createUser(emptyUser);
-            return new ResponseEntity<>(compliteUser, HttpStatus.OK);
-        }catch (RuntimeException e) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            User createdUser = userService.createUser(user);
+            return new ResponseEntity<>(createdUser, HttpStatus.OK);
+        } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.statusNotValid("Login or password is empty", "/create");
-
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
     @GetMapping("/get")
     public ResponseEntity<List<UserDTO>> getUsers() {
         List<User> userList = userService.getAllUsers();
