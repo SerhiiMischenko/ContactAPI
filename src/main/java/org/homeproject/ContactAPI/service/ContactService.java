@@ -32,13 +32,11 @@ public class ContactService {
                 .orElseThrow(() -> new RuntimeException("Contact not found"));
     }
 
-    public List<Contact> getContactsByUserId(Long id) {
+    public List<Contact> getContactListByUserId(Long id) {
         List<Contact> contactRepositoryAll = contactRepository.findAll();
 
-        List<Contact> filteredContacts = contactRepositoryAll.stream()
+        return contactRepositoryAll.stream()
                 .filter(contact -> contact.getUser_id().equals(id))
                 .collect(Collectors.toList());
-
-        return filteredContacts;
     }
 }

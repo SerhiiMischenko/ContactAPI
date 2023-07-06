@@ -51,7 +51,7 @@ public class ContactController {
         String currentUsername = authentication.getName();
         User currentUser = userService.getUserByUsername(currentUsername);
 
-        List<Contact> userContacts = contactService.getContactsByUserId(currentUser.getId());
+        List<Contact> userContacts = contactService.getContactListByUserId(currentUser.getId());
 
         ModelMapper modelMapper = new ModelMapper();
         List<ContactDTO> contactDTOList = userContacts.stream()
@@ -63,22 +63,29 @@ public class ContactController {
 
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getContactByID(@PathVariable("id") Long id) {
-        try {
-            Contact findContact = contactService.readContactById(id);
-            if (findContact != null) {
-                ModelMapper modelMapper = new ModelMapper();
-                ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
-                return new ResponseEntity<>(contactDTO, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.statusNotFound(id, "Contact not found", "/get/" + id);
+    public ResponseEntity<?> getContactByID(@PathVariable("id") Long id, Authentication authentication) {
+        String currentName = authentication.getName();
+        User currentUser = userService.getUserByUsername(currentName);
+        Contact findContact = contactService.readContactById(id);
+        if(findContact.getUser_id().equals(currentUser.getId())){
+            try {
+                if (findContact != null) {
+                    ModelMapper modelMapper = new ModelMapper();
+                    ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
+                    return new ResponseEntity<>(contactDTO, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
+            } catch (RuntimeException e) {
+                ErrorResponse errorResponse = new ErrorResponse();
+                errorResponse.statusNotFound(id, "Contact not found", "/get/" + id);
 
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+            }
         }
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.statusNotFound(id, "Contact not found", "/get/" + id);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
 
