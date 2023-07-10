@@ -1,4 +1,4 @@
-package org.homeproject.ContactAPI.security;
+package org.homeproject.ContactAPI.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

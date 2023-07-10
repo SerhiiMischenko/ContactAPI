@@ -1,4 +1,5 @@
 package org.homeproject.ContactAPI.controller;
+import io.swagger.annotations.Api;
 import org.homeproject.ContactAPI.dto.ContactDTO;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.homeproject.ContactAPI.error.ErrorResponse;
@@ -18,6 +19,7 @@ import org.homeproject.ContactAPI.entity.User;
 
 @RestController
 @RequestMapping("/contact")
+@Api(tags = "Contacts Management")
 public class ContactController {
     private final ContactService contactService;
     private final UserService userService;
