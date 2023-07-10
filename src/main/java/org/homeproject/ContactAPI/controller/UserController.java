@@ -1,5 +1,7 @@
 package org.homeproject.ContactAPI.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.homeproject.ContactAPI.dto.UserDTO;
 import org.homeproject.ContactAPI.entity.User;
 import org.homeproject.ContactAPI.error.ErrorResponse;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
+@Api(tags = "Users Management")
 public class UserController {
     private final UserService userService;
     @Autowired
@@ -23,6 +26,8 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    @ApiOperation(value = "Create user by request body", notes = "Returns a new creation user")
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
@@ -36,6 +41,7 @@ public class UserController {
         }
     }
 
+    @ApiOperation(value = "Get all users", notes = "Returns users list")
     @GetMapping("/get")
     public ResponseEntity<List<UserDTO>> getUsers() {
         List<User> userList = userService.getAllUsers();
@@ -45,6 +51,8 @@ public class UserController {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(userDTOList, HttpStatus.OK);
     }
+
+    @ApiOperation(value = "Get user by ID", notes = "Returns a single user based on ID")
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
     try {
@@ -58,6 +66,8 @@ public class UserController {
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
     }
+
+    @ApiOperation(value = "Update user by ID", notes = "Returns this updated user")
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
     try {
@@ -80,6 +90,8 @@ public class UserController {
     }
     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @ApiOperation(value = "Delete user by ID", notes = "Returns response with Http status")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id) {
     ErrorResponse errorResponse = new ErrorResponse();
