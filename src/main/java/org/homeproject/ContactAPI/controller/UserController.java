@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "Create user by request body", notes = "Returns a new creation user")
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -36,13 +36,13 @@ public class UserController {
             return new ResponseEntity<>(createdUser, HttpStatus.OK);
         } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.statusNotValid("Login or password is empty", "/create");
+            errorResponse.statusNotValid("Login or password is empty", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
 
     @ApiOperation(value = "Get all users", notes = "Returns users list")
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<List<UserDTO>> getUsers() {
         List<User> userList = userService.getAllUsers();
         ModelMapper modelMapper = new ModelMapper();
@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "Get user by ID", notes = "Returns a single user based on ID")
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
     try {
         User getUser = userService.getUserById(id);
@@ -62,13 +62,13 @@ public class UserController {
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }catch (RuntimeException e) {
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.statusNotFound(id, "User not found", "/get/");
+        errorResponse.statusNotFound(id, "User not found", "/user/");
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
     }
 
     @ApiOperation(value = "Update user by ID", notes = "Returns this updated user")
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
     try {
         User oldUser = userService.getUserById(id);
@@ -84,7 +84,7 @@ public class UserController {
         }
     }catch (RuntimeException e) {
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.statusNotFound(id, "User not found", "/update/");
+        errorResponse.statusNotFound(id, "User not found", "/user/");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
@@ -92,16 +92,16 @@ public class UserController {
     }
 
     @ApiOperation(value = "Delete user by ID", notes = "Returns response with Http status")
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id) {
     ErrorResponse errorResponse = new ErrorResponse();
     try {
         userService.deleteUserById(id);
-        errorResponse.statusOk(id, "User deleted", "/delete/");
+        errorResponse.statusOk(id, "User deleted", "/user/");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.OK);
     }catch (RuntimeException e) {
-        errorResponse.statusNotFound(id, "User not found", "/delete/");
+        errorResponse.statusNotFound(id, "User not found", "/user/");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }

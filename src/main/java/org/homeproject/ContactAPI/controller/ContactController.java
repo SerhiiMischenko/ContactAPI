@@ -33,7 +33,7 @@ public class ContactController {
         this.userService = userService;
     }
     @ApiOperation(value = "Create contact by request body", notes = "Returns a new creation contact")
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createContact(@RequestBody Contact contact) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserName = authentication.getName();
@@ -43,13 +43,13 @@ public class ContactController {
             return new ResponseEntity<>(contactService.createContact(newContact), HttpStatus.OK);
         } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.statusNotValid("Some row is empty", "/create");
+            errorResponse.statusNotValid("Some row is empty", "/contact");
 
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
     @ApiOperation(value = "Get all user contacts", notes = "Returns contacts list")
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<List<ContactDTO>> getContacts(Authentication authentication) {
         String currentUsername = authentication.getName();
         User currentUser = userService.getUserByUsername(currentUsername);
@@ -73,30 +73,30 @@ public class ContactController {
     }
 
     @ApiOperation(value = "Get contact by ID", notes = "Returns a single contact based on ID")
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getContactByID(@PathVariable("id") Long id, Authentication authentication) {
-        String currentName = authentication.getName();
-        User currentUser = userService.getUserByUsername(currentName);
-        Contact findContact = contactService.readContactById(id);
-        if(findContact.getUser_id().equals(currentUser.getId()) || currentUser.getRole().equals("ROLE_ADMIN")){
-            try {
+        try {
+            String currentName = authentication.getName();
+            User currentUser = userService.getUserByUsername(currentName);
+            Contact findContact = contactService.readContactById(id);
+            if(findContact.getUser_id().equals(currentUser.getId()) || currentUser.getRole().equals("ROLE_ADMIN")){
                 ModelMapper modelMapper = new ModelMapper();
                 ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
                 return new ResponseEntity<>(contactDTO, HttpStatus.OK);
-            } catch (RuntimeException e) {
-                ErrorResponse errorResponse = new ErrorResponse();
-                errorResponse.statusNotFound(id, "Contact not found", "/get/");
-
-                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
+        }catch (RuntimeException e) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.statusNotFound(id, "Contact not found", "/get/");
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.statusNotFound(id, "Contact not found", "/get/");
+        errorResponse.statusNotFound(id, "Contact not found", "/contact/");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ApiOperation(value = "Update contact by ID", notes = "Returns this updated contact")
-    @PutMapping("update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateContact(@PathVariable ("id") Long id,
                                            @RequestBody Contact contact, Authentication authentication) {
         String currentName = authentication.getName();
@@ -118,17 +118,17 @@ public class ContactController {
                 return new ResponseEntity<>(updContact, HttpStatus.OK);
             }catch (RuntimeException e) {
                 ErrorResponse errorResponse = new ErrorResponse();
-                errorResponse.statusNotFound(id, "Contact not found", "update/");
+                errorResponse.statusNotFound(id, "Contact not found", "contact/");
                 return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
         }
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.statusNotFound(id, "Contact not found", "update/");
+        errorResponse.statusNotFound(id, "Contact not found", "contact/");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ApiOperation(value = "Delete contact by ID", notes = "Returns response with Http status")
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ErrorResponse> deleteById(@PathVariable ("id") Long id,
                                                     Authentication authentication) {
         ErrorResponse errorResponse = new ErrorResponse();
@@ -138,11 +138,11 @@ public class ContactController {
         if(currentUser.getId().equals(findContact.getUser_id()) || currentUser.getRole().equals("ROLE_ADMIN")){
             try {
                 contactService.deleteById(id);
-                errorResponse.statusOk(id, "Contact deleted", "delete/");
+                errorResponse.statusOk(id, "Contact deleted", "contact/");
 
                 return new ResponseEntity<>(errorResponse, HttpStatus.OK);
             }catch (RuntimeException e) {
-                errorResponse.statusNotFound(id, "Contact not found", "delete/");
+                errorResponse.statusNotFound(id, "Contact not found", "contact/");
 
                 return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
