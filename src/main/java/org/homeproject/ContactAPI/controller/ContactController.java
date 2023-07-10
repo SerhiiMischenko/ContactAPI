@@ -1,5 +1,6 @@
 package org.homeproject.ContactAPI.controller;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.homeproject.ContactAPI.dto.ContactDTO;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.homeproject.ContactAPI.error.ErrorResponse;
@@ -31,7 +32,7 @@ public class ContactController {
         this.contactService = contactService;
         this.userService = userService;
     }
-
+    @ApiOperation(value = "Create contact by request body", notes = "Returns a new creation contact")
     @PostMapping("/create")
     public ResponseEntity<?> createContact(@RequestBody Contact contact) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -47,7 +48,7 @@ public class ContactController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
-
+    @ApiOperation(value = "Get all user contacts", notes = "Returns contacts list")
     @GetMapping("/get")
     public ResponseEntity<List<ContactDTO>> getContacts(Authentication authentication) {
         String currentUsername = authentication.getName();
@@ -71,7 +72,7 @@ public class ContactController {
         return new ResponseEntity<>(contactDTOList, HttpStatus.OK);
     }
 
-
+    @ApiOperation(value = "Get contact by ID", notes = "Returns a single contact based on ID")
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getContactByID(@PathVariable("id") Long id, Authentication authentication) {
         String currentName = authentication.getName();
@@ -94,7 +95,7 @@ public class ContactController {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-
+    @ApiOperation(value = "Update contact by ID", notes = "Returns this updated contact")
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateContact(@PathVariable ("id") Long id,
                                            @RequestBody Contact contact, Authentication authentication) {
@@ -125,6 +126,8 @@ public class ContactController {
         errorResponse.statusNotFound(id, "Contact not found", "update/");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+
+    @ApiOperation(value = "Delete contact by ID", notes = "Returns response with Http status")
     @DeleteMapping("delete/{id}")
     public ResponseEntity<ErrorResponse> deleteById(@PathVariable ("id") Long id,
                                                     Authentication authentication) {
