@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -33,69 +34,96 @@ public class ContactController {
         this.userService = userService;
     }
     @ApiOperation(value = "Create contact by request body", notes = "Returns a new creation contact")
+    @Secured("ROLE_USER")
     @PostMapping()
-    public ResponseEntity<?> createContact(@RequestBody Contact contact) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = authentication.getName();
-        User currentUser = userService.getUserByUsername(currentUserName);
-        Contact newContact = new Contact(currentUser, contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber());
+    public ResponseEntity<?> createContact(@RequestBody Contact contact, Authentication authentication) {
         try {
-            return new ResponseEntity<>(contactService.createContact(newContact), HttpStatus.OK);
-        } catch (RuntimeException e) {
+            String currentUserName = authentication.getName();
+            User currentUser = userService.getUserByUsername(currentUserName);
+            if(authentication.isAuthenticated() && currentUser.getRole().equals("ROLE_USER")) {
+                Contact newContact =
+                        new Contact(currentUser, contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber());
+                return new ResponseEntity<>(contactService.createContact(newContact), HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.statusNotValid("Some row is empty", "/contact");
 
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.statusNotAuthorized("You are no authorized", "/contact");
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
+
     @ApiOperation(value = "Get all user contacts", notes = "Returns contacts list")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @GetMapping()
-    public ResponseEntity<List<ContactDTO>> getContacts(Authentication authentication) {
-        String currentUsername = authentication.getName();
-        User currentUser = userService.getUserByUsername(currentUsername);
-        if(currentUser.getRole().equals("ROLE_ADMIN")) {
-            ModelMapper modelMapper = new ModelMapper();
-            List<Contact> allContacts = contactService.readAllContacts();
-            List<ContactDTO> allContactsDTO = allContacts.stream()
-                    .map(contact -> modelMapper.map(contact, ContactDTO.class))
-                    .collect(Collectors.toList());
-            return new ResponseEntity<>(allContactsDTO, HttpStatus.OK);
+    public ResponseEntity<?> getContacts(Authentication authentication) {
+        try {
+            String currentUsername = authentication.getName();
+            User currentUser = userService.getUserByUsername(currentUsername);
+            if(authentication.isAuthenticated() && currentUser.getRole().equals("ROLE_ADMIN")) {
+                ModelMapper modelMapper = new ModelMapper();
+                List<Contact> allContacts = contactService.readAllContacts();
+                List<ContactDTO> allContactsDTO = allContacts.stream()
+                        .map(contact -> modelMapper.map(contact, ContactDTO.class))
+                        .collect(Collectors.toList());
+                return new ResponseEntity<>(allContactsDTO, HttpStatus.OK);
+            }
+            else if (authentication.isAuthenticated() && currentUser.getRole().equals("ROLE_USER")){
+                List<Contact> userContacts = contactService.getContactListByUserId(currentUser.getId());
+
+                ModelMapper modelMapper = new ModelMapper();
+                List<ContactDTO> contactDTOList = userContacts.stream()
+                        .map(contact -> modelMapper.map(contact, ContactDTO.class))
+                        .collect(Collectors.toList());
+
+                return new ResponseEntity<>(contactDTOList, HttpStatus.OK);
+            }
+
+        }catch (Exception e) {
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.statusNotAuthorized("You are no authorized", "/contact");
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         }
 
-        List<Contact> userContacts = contactService.getContactListByUserId(currentUser.getId());
-
-        ModelMapper modelMapper = new ModelMapper();
-        List<ContactDTO> contactDTOList = userContacts.stream()
-                .map(contact -> modelMapper.map(contact, ContactDTO.class))
-                .collect(Collectors.toList());
-
-        return new ResponseEntity<>(contactDTOList, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get contact by ID", notes = "Returns a single contact based on ID")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @GetMapping("/{id}")
     public ResponseEntity<?> getContactByID(@PathVariable("id") Long id, Authentication authentication) {
         try {
             String currentName = authentication.getName();
             User currentUser = userService.getUserByUsername(currentName);
             Contact findContact = contactService.readContactById(id);
-            if(findContact.getUser_id().equals(currentUser.getId()) || currentUser.getRole().equals("ROLE_ADMIN")){
+            if(authentication.isAuthenticated() && findContact.getUser_id().equals(currentUser.getId()) ||
+                    currentUser.getRole().equals("ROLE_ADMIN")){
                 ModelMapper modelMapper = new ModelMapper();
                 ContactDTO contactDTO = modelMapper.map(findContact, ContactDTO.class);
                 return new ResponseEntity<>(contactDTO, HttpStatus.OK);
             }
-        }catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.statusNotFound(id, "Contact not found", "/get/");
+            if(authentication.isAuthenticated() && findContact.getUser_id().equals(currentUser.getId()) ||
+                    currentUser.getRole().equals("ROLE_USER")){
+                return new ResponseEntity<>(findContact, HttpStatus.OK);
+            }else {
+                ErrorResponse errorResponse = new ErrorResponse();
+                errorResponse.statusNotAuthorized("You are no authorized", "/contact");
 
-            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+            }
+        }catch (RuntimeException e) {
         }
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.statusNotFound(id, "Contact not found", "/contact/");
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        errorResponse.statusNotAuthorized("You are no authorized", "/contact");
+        return new ResponseEntity<>(errorResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Update contact by ID", notes = "Returns this updated contact")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @PutMapping("/{id}")
     public ResponseEntity<?> updateContact(@PathVariable ("id") Long id,
                                            @RequestBody Contact contact, Authentication authentication) {
@@ -128,6 +156,7 @@ public class ContactController {
     }
 
     @ApiOperation(value = "Delete contact by ID", notes = "Returns response with Http status")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @DeleteMapping("/{id}")
     public ResponseEntity<ErrorResponse> deleteById(@PathVariable ("id") Long id,
                                                     Authentication authentication) {
