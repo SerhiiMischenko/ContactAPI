@@ -14,6 +14,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,8 +50,8 @@ public class UserController {
             errorResponse.statusNotValid("Password is empty", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
-        if(userService.getUserByUsername(user.getUsername()) != null &&
-                userService.getUserByUsername(user.getUsername()).getUsername().equals(user.getUsername())){
+        if (userService.getUserByUsername(user.getUsername()) != null &&
+                userService.getUserByUsername(user.getUsername()).getUsername().equals(user.getUsername())) {
             errorResponse.statusAlreadyCreated("This account already created", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
@@ -94,25 +95,25 @@ public class UserController {
         User oldUser;
         try {
             oldUser = userService.getUserById(id);
-        }catch (RuntimeException ignore) {
+        } catch (RuntimeException ignore) {
             errorResponse.statusNotFound(id, "User not found", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         User currentUser = userService.getUserByUsername(authentication.getName());
 
-        if(!oldUser.getId().equals(currentUser.getId())) {
+        if (!oldUser.getId().equals(currentUser.getId())) {
             errorResponse.statusNotAuthorized("You are not authorized", "/path");
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         }
-        if(user.getUsername() != null &&
+        if (user.getUsername() != null &&
                 oldUser.getUsername().equals(user.getUsername())) {
             errorResponse.statusAlreadyCreated("This username already exist", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-        }else if(user.getUsername() != null) {
+        } else if (user.getUsername() != null) {
             oldUser.setUsername(user.getUsername());
         }
-        if(user.getPassword() != null) {
+        if (user.getPassword() != null) {
             oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         userService.updateUser(oldUser);
@@ -121,19 +122,24 @@ public class UserController {
     }
 
     @ApiOperation(value = "Delete user by ID", notes = "Returns response with Http status")
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable Long id) {
-        ErrorResponse errorResponse = new ErrorResponse();
+    public ResponseEntity<?> deleteById(@PathVariable Long id, Authentication authentication) {
         try {
-            userService.deleteUserById(id);
-            errorResponse.statusOk(id, "User deleted", "/user/");
+            User user = userService.getUserById(id);
+            User authUser = userService.getUserByUsername(authentication.getName());
+            if (!user.getId().equals(authUser.getId())) {
+                errorResponse.statusNotAuthorized("You are not authorized", "/user");
 
-            return new ResponseEntity<>(errorResponse, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            errorResponse.statusNotFound(id, "User not found", "/user/");
-
+                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+            }
+        } catch (Exception e) {
+            errorResponse.statusNotFound(id, "User not found", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
+        userService.deleteUserById(id);
+        errorResponse.statusOk(id, "User deleted", "/user/");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.OK);
     }
 }
