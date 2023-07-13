@@ -88,28 +88,36 @@ public class UserController {
     }
 
     @ApiOperation(value = "Update user by ID", notes = "Returns this updated user")
-    @Secured("ROLE_ADMIN")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user, Authentication authentication) {
+        User oldUser;
         try {
-            User oldUser = userService.getUserById(id);
-            if (oldUser != null) {
-                if (user.getUsername() != null && user.getPassword() != null) {
-                    oldUser.setUsername(user.getUsername());
-                    oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
-                }
-                oldUser.setRole(user.getRole());
-                User updateUser = userService.updateUser(oldUser);
-
-                return new ResponseEntity<>(updateUser, HttpStatus.OK);
-            }
-        } catch (RuntimeException e) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.statusNotFound(id, "User not found", "/user/");
-
+            oldUser = userService.getUserById(id);
+        }catch (RuntimeException ignore) {
+            errorResponse.statusNotFound(id, "User not found", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        User currentUser = userService.getUserByUsername(authentication.getName());
+
+        if(!oldUser.getId().equals(currentUser.getId())) {
+            errorResponse.statusNotAuthorized("You are not authorized", "/path");
+            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        }
+        if(user.getUsername() != null &&
+                oldUser.getUsername().equals(user.getUsername())) {
+            errorResponse.statusAlreadyCreated("This username already exist", "/user");
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        }else if(user.getUsername() != null) {
+            oldUser.setUsername(user.getUsername());
+        }
+        if(user.getPassword() != null) {
+            oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        userService.updateUser(oldUser);
+
+        return new ResponseEntity<>(oldUser, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete user by ID", notes = "Returns response with Http status")
