@@ -49,7 +49,8 @@ public class UserController {
             errorResponse.statusNotValid("Password is empty", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
-        if(userService.getUserByUsername(user.getUsername()).getUsername().equals(user.getUsername())){
+        if(userService.getUserByUsername(user.getUsername()) != null &&
+                userService.getUserByUsername(user.getUsername()).getUsername().equals(user.getUsername())){
             errorResponse.statusAlreadyCreated("This account already created", "/user");
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
