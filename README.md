@@ -1,6 +1,6 @@
-# My Spring Project
+# Contact book API
 
-This is a sample Spring project that demonstrates the usage of Spring framework and its features.
+This is a contact book Spring project that demonstrates the usage of Spring framework and its features.
 
 ## Requirements
 
