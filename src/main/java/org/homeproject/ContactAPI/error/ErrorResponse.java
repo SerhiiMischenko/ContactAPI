@@ -39,4 +39,11 @@ public class ErrorResponse {
         this.setTimestamp(LocalDateTime.now());
         this.setPath(path);
     }
+
+    public void  statusAlreadyCreated(String message, String path) {
+        this.setStatus(HttpStatus.CONFLICT.value());
+        this.setMessage(message);
+        this.setTimestamp(LocalDateTime.now());
+        this.setPath(path);
+    }
 }
