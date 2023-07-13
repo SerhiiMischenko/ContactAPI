@@ -2,6 +2,7 @@ package org.homeproject.ContactAPI.error;
 
 import lombok.Data;
 import org.springframework.http.HttpStatus;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -19,6 +20,7 @@ public class ErrorResponse {
         this.setPath(path + id);
 
     }
+
     public void statusOk(Long id, String message, String path) {
         this.setStatus(HttpStatus.OK.value());
         this.setMessage(message);
@@ -26,6 +28,7 @@ public class ErrorResponse {
         this.setPath(path + id);
 
     }
+
     public void statusNotValid(String message, String path) {
         this.setStatus(HttpStatus.BAD_REQUEST.value());
         this.setMessage(message);
@@ -40,7 +43,7 @@ public class ErrorResponse {
         this.setPath(path);
     }
 
-    public void  statusAlreadyCreated(String message, String path) {
+    public void statusAlreadyCreated(String message, String path) {
         this.setStatus(HttpStatus.CONFLICT.value());
         this.setMessage(message);
         this.setTimestamp(LocalDateTime.now());
