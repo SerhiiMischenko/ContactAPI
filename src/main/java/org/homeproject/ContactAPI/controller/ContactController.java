@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.homeproject.ContactAPI.dto.ContactDTO;
 import org.homeproject.ContactAPI.entity.Contact;
 import org.homeproject.ContactAPI.error.ErrorResponse;
+import org.homeproject.ContactAPI.error.InvalidPhoneNumberException;
 import org.homeproject.ContactAPI.service.ContactService;
 import org.homeproject.ContactAPI.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -44,11 +45,12 @@ public class ContactController {
             errorResponse.statusNotAuthorized("You are no authorized", "/contact");
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         }
+        Contact newContact =new Contact();
         try {
             String currentUserName = authentication.getName();
             User currentUser = userService.getUserByUsername(currentUserName);
             if (authentication.isAuthenticated() && currentUser.getRole().equals("ROLE_USER")) {
-                Contact newContact =
+                newContact =
                         new Contact(currentUser, contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber());
                 return new ResponseEntity<>(contactService.createContact(newContact), HttpStatus.OK);
             } else {
@@ -56,10 +58,11 @@ public class ContactController {
                 return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
             }
 
+        } catch (InvalidPhoneNumberException e) {
+                errorResponse.statusNotValid("Not valid phone number", "/contact");
+                return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (Exception e) {
-            errorResponse.statusNotValid("Some row is empty", "/contact");
-
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(contactService.createContact(newContact), HttpStatus.OK);
         }
     }
 
